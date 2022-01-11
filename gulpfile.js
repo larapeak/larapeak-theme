@@ -28,20 +28,19 @@ const handleError = (done) => {
     };
 };
 
-function hbs(done) {
-    pump([
-        src(['*.hbs', '**/**/*.hbs', '!node_modules/**/*.hbs']),
-        livereload()
-    ], handleError(done));
-}
-
 function css(done) {
     var processors = [
         easyimport,
         colorFunction(),
+        require('tailwindcss'),
         autoprefixer(),
         cssnano()
     ];
+
+    pump([
+        src(['*.hbs', '**/**/*.hbs', '!node_modules/**/*.hbs']),
+        livereload()
+    ]);
 
     pump([
         src('assets/css/*.css', {sourcemaps: true}),
@@ -76,9 +75,7 @@ function zipper(done) {
     ], handleError(done));
 }
 
-const cssWatcher = () => watch('assets/css/**', css);
-const hbsWatcher = () => watch(['*.hbs', '**/**/*.hbs', '!node_modules/**/*.hbs'], hbs);
-const watcher = parallel(cssWatcher, hbsWatcher);
+const watcher = () => watch(['assets/css/**', '*.hbs', '**/**/*.hbs', '!node_modules/**/*.hbs'], css);
 const build = series(css, js);
 const dev = series(build, serve, watcher);
 
